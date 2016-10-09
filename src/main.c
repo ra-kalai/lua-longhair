@@ -73,8 +73,8 @@ struct CauchyDecoder {
   int bytes;
   int original_count;
   int recovery_count;
-  unsigned char *data_start;
-  unsigned char *data_ret_start;
+  char *data_start;
+  char *data_ret_start;
   Block block_info[0];
   unsigned char data[0]; // for reference ; data is after the block_info list
   unsigned char data_ret[0]; // for reference ; data is after the block_info list
@@ -119,7 +119,7 @@ int lua_cauchy_decoder_push(lua_State *L) {
     insertion_point = k - (++decoder->recovery_count);
   }
 
-  unsigned char *dest = decoder->data_start + insertion_point*bytes;
+  unsigned char *dest = (unsigned char*)decoder->data_start + insertion_point*bytes;
   memcpy(dest, new_data, bytes);
 
   Block *block = &decoder->block_info[insertion_point];
@@ -128,6 +128,11 @@ int lua_cauchy_decoder_push(lua_State *L) {
 
   if (decoder->original_count + decoder->recovery_count < k) {
     lua_pushnil(L);
+    return 1;
+  }
+
+  if (decoder->original_count == k) {
+    lua_pushlstring(L, decoder->data_ret_start, bytes*k);
     return 1;
   }
 

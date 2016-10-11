@@ -2,10 +2,16 @@ include config.mk
 
 clib := longhair.so
 
+
 all: $(clib)
 
-$(clib): src/main.c longhair/longhair-mobile/cauchy_256.c
-	$(CC) $(CFLAGS) -Ilonghair/longhair-mobile/  $? -o $@
+%.o: %.c
+	$(CC) $(CFLAGS) $(LUA_CFLAGS) -Ilonghair/longhair-mobile/  -c $< -o $@
+
+$(clib): src/main.o longhair/longhair-mobile/cauchy_256.o
+	$(CC) $(LDFLAGS) $< -o $@
+
+
 
 longhair/longhair-mobile/cauchy_256.c:
 	git submodule init
@@ -15,4 +21,4 @@ install: $(clib)
 	install -m 644 $< $(cmoddir)
 
 clean:
-	rm -f longhair.so
+	rm -f longhair.so src/main.o
